@@ -16,20 +16,12 @@ def _list():
     kw = request.args.get('kw', type=str, default='')
     so = request.args.get('so', type=str, default='recent')
 
-    if so == 'recommand':
-        sub_query = db.session.query(
-            question_voter.c.question_id, func.count('*').label('num_voter'))\
-            .group_by(question_voter.c.question_id).subquery()
-        question_list = Question.query \
-            .outerjoin(sub_query, Question.id == sub_query.c.question.id) \
-            .order_by(sub_query.c.num_voter.desc(), Question.create_date.desc())
-    elif so == 'pupular':
-        sub_query = db.session.query(
-            Answer.question_id, func.count('*').label('num_answer')) \
-            .group_by(Answer.question_id).subquery()
-        question_list = Question.query \
-            .outerjoin(sub_query, Question.id == sub_query.c.question.id) \
-            .order_by(sub_query.c.num_answer.desc(), Question.create_date.desc())
+    if so == 'recommend':
+        sub_query = db.session.query(question_voter.c.question_id, func.count('*').label('num_voter')).group_by(question_voter.c.question_id).subquery()
+        question_list = Question.query.outerjoin(sub_query, Question.id == sub_query.c.question_id).order_by(sub_query.c.num_voter.desc(), Question.create_date.desc())
+    elif so == 'popular':
+        sub_query = db.session.query(Answer.question_id, func.count('*').label('num_answer')).group_by(Answer.question_id).subquery()
+        question_list = Question.query.outerjoin(sub_query, Question.id == sub_query.c.question_id).order_by(sub_query.c.num_answer.desc(), Question.create_date.desc())
     else:
         question_list = Question.query.order_by(Question.create_date.desc())
 
